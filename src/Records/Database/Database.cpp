@@ -32,17 +32,18 @@ int Database::createDatabase(std::string filename) {
     } else if(std::filesystem::exists(filename) == false) {
         int rc = sqlite3_open(filename.c_str(), &db);
         if(rc == SQLITE_OK) {
-            std::cout << "database file created" << std::endl;
+            std::cout << "database file created: " << filename << std::endl;
             connected = true;
             return 0;
         } else {
             std::cout << "Connection Failed with Code: " << rc << std::endl;
             return 1;
+            // Need to figure out how to trigger this for unit test
         }
 
     } else if(std::filesystem::exists(filename) == true) {
         std::cout << "The database file already exsists" << std::endl;
-        return 1;
+        return 2;
     }
 
     return 1;
@@ -55,7 +56,7 @@ int Database::closeDatabase(){
         return sqlite3_close(db);
     } else {
         std::cout << "No database connection" << std::endl;
-        return 0;
+        return 1;
     }
     
 }
