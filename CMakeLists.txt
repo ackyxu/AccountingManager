@@ -6,46 +6,43 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 
 # find_package(libpqxx REQUIRED)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src)
 
-set(SOURCES 
 
-src/Records/Database/Database.cpp
+file(GLOB_RECURSE SRC CONFIGURE_DEPENDS src/*)
+
+
+set(DEPS 
 deps/sqlite3/sqlite3.c
-
 )
 
 set(HEADERS 
-src/Records/Database/Database.h
 deps/sqlite3/sqlite3.h
 )
 
 
-
-# if(TARGET libpqxx::pqxx)
-#     message("libpqxx defined!")
-# else() 
-#     message("not found")
-# endif()
-
-
 add_subdirectory(deps/googletest)
+
 add_executable(AccountingManager 
     main.cpp
-    ${SOURCES})
-add_executable(UnitTests 
+    ${SRC}
+    ${DEPS})
+
+    add_executable(UnitTests 
     test/UnitTests.cpp
-    ${SOURCES})
+    ${SRC}
+    ${DEPS})
 
 target_include_directories(AccountingManager PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Records/Database
-    ${CMAKE_CURRENT_SOURCE_DIR}/deps/sqlite3
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/)
+    src/Records/Database
+    src/Records/Accounts
+    deps/sqlite3)
     
 target_include_directories(UnitTests PUBLIC 
-    ${CMAKE_CURRENT_SOURCE_DIR}/src/Records/Database
-    ${CMAKE_CURRENT_SOURCE_DIR}/deps/sqlite3
-    ${CMAKE_CURRENT_SOURCE_DIR}/tests/)
+    src/Records/Database
+    src/Records/Accounts
+    deps/sqlite3
+    tests/)
 
 target_link_libraries(UnitTests gtest_main)
 

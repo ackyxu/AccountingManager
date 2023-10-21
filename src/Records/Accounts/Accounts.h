@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <AccountType.h>
 using std::string;
 
 class Accounts {
@@ -7,13 +8,14 @@ class Accounts {
         int accNum;
         string accName;
         string accDesc;
-        string accType;
+        AccountType accType;
         float accAmt = 0;
     
     public:
-        Accounts(int accNum, string accName, string accDesc, string accType);
-        string getAccNum();
+        Accounts(int accNum, string accName, string accDesc, AccountType accType);
+        int getAccNum();
         string getAccName();
         string getAccDesc();
+        AccountType getAccType();
 
 };

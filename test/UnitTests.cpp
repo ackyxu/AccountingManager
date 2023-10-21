@@ -4,6 +4,7 @@
 #include <string.h>
 #include <vector>
 #include <stdio.h>
+#include <ChartOfAccounts.h>
 
 
 
@@ -55,7 +56,309 @@ TEST_F(DatabaseTest, DatabaseTwoDatabaseFileTest){
     ASSERT_EQ(db.connectDatabase(filename),0) << "Cannot Connect";
 }
 
+class ChartOfAccountsTest : public :: testing ::Test {
 
+    protected:
+        Accounts* acc;
+        ChartOfAccounts coa;
+        int status;
+};
+
+
+TEST_F(ChartOfAccountsTest, COA_Add_Asset){
+    ASSERT_EQ(coa.CreateAccount(1000,"Cash","BankAcc"),0);
+    ASSERT_EQ(coa.CreateAccount(1500,"Equipment","Equipment Capital Asset"),0);
+    ASSERT_EQ(coa.CreateAccount(1999,"Goodwill","Goodwill Account"),0);
+    ASSERT_EQ(coa.CreateAccount(2000, "TestLia", "Test of liability"),0);
+
+    
+    // Check for acc# 1000
+    status = coa.getAccount(1000,&acc);
+    
+    ASSERT_EQ(status,0) << "Cannot find the account 1000, skipping the account checks";
+    
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 1000);
+        ASSERT_EQ(acc->getAccName(), "Cash");
+        ASSERT_EQ(acc->getAccDesc(), "BankAcc");
+        ASSERT_EQ(acc->getAccType(), ASSET);
+    }
+
+    // Check for acc# 1500
+    status = coa.getAccount(1500,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 1500, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 1500);
+        ASSERT_EQ(acc->getAccName(), "Equipment");
+        ASSERT_EQ(acc->getAccDesc(), "Equipment Capital Asset");
+        ASSERT_EQ(acc->getAccType(), ASSET);
+    }
+
+
+    // Check for acc# 1999
+    status = coa.getAccount(1999,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 1999, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 1999);
+        ASSERT_EQ(acc->getAccName(), "Goodwill");
+        ASSERT_EQ(acc->getAccDesc(), "Goodwill Account");
+        ASSERT_EQ(acc->getAccType(), ASSET);
+    }
+
+
+    status = coa.getAccount(2000,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 2000, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 2000);
+        ASSERT_EQ(acc->getAccName(), "TestLia");
+        ASSERT_EQ(acc->getAccDesc(), "Test of liability");
+        ASSERT_EQ(acc->getAccType(), LIABILITY);
+    }
+
+
+}
+
+
+
+TEST_F(ChartOfAccountsTest, COA_Add_Liability){
+    ASSERT_EQ(coa.CreateAccount(2000,"AP","Accounts Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(2500,"Debt","Bank Debt"),0);
+    ASSERT_EQ(coa.CreateAccount(2999,"Taxes Payable","Corperate Taxes Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(3000, "TestEQ", "Test of equity"),0);
+
+    
+    // Check for acc# 2000
+    status = coa.getAccount(2000,&acc);
+    
+    ASSERT_EQ(status,0) << "Cannot find the account 2000, skipping the account checks";
+    
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 2000);
+        ASSERT_EQ(acc->getAccName(), "AP");
+        ASSERT_EQ(acc->getAccDesc(), "Accounts Payable");
+        ASSERT_EQ(acc->getAccType(), LIABILITY);
+    }
+
+    // Check for acc# 2500
+    status = coa.getAccount(2500,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 2500, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 2500);
+        ASSERT_EQ(acc->getAccName(), "Debt");
+        ASSERT_EQ(acc->getAccDesc(), "Bank Debt");
+        ASSERT_EQ(acc->getAccType(), LIABILITY);
+    }
+
+
+    // Check for acc# 2999
+    status = coa.getAccount(2999,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 2999, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 2999);
+        ASSERT_EQ(acc->getAccName(), "Taxes Payable");
+        ASSERT_EQ(acc->getAccDesc(), "Corperate Taxes Payable");
+        ASSERT_EQ(acc->getAccType(), LIABILITY);
+    }
+
+
+    status = coa.getAccount(3000,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 3000, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 3000);
+        ASSERT_EQ(acc->getAccName(), "TestEQ");
+        ASSERT_EQ(acc->getAccDesc(), "Test of equity");
+        ASSERT_EQ(acc->getAccType(), EQUITY);
+    }
+
+
+}
+
+TEST_F(ChartOfAccountsTest, COA_Add_Equity){
+    ASSERT_EQ(coa.CreateAccount(3000,"AP","Accounts Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(3500,"Debt","Bank Debt"),0);
+    ASSERT_EQ(coa.CreateAccount(3999,"Taxes Payable","Corperate Taxes Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(4000, "TestEQ", "Test of equity"),0);
+
+    
+    // Check for acc# 3000
+    status = coa.getAccount(3000,&acc);
+    
+    ASSERT_EQ(status,0) << "Cannot find the account 3000, skipping the account checks";
+    
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 3000);
+        ASSERT_EQ(acc->getAccName(), "AP");
+        ASSERT_EQ(acc->getAccDesc(), "Accounts Payable");
+        ASSERT_EQ(acc->getAccType(), EQUITY);
+    }
+
+    // Check for acc# 3500
+    status = coa.getAccount(3500,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 3500, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 3500);
+        ASSERT_EQ(acc->getAccName(), "Debt");
+        ASSERT_EQ(acc->getAccDesc(), "Bank Debt");
+        ASSERT_EQ(acc->getAccType(), EQUITY);
+    }
+
+
+    // Check for acc# 3999
+    status = coa.getAccount(3999,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 3999, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 3999);
+        ASSERT_EQ(acc->getAccName(), "Taxes Payable");
+        ASSERT_EQ(acc->getAccDesc(), "Corperate Taxes Payable");
+        ASSERT_EQ(acc->getAccType(), EQUITY);
+    }
+
+
+    status = coa.getAccount(4000,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 4000, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 4000);
+        ASSERT_EQ(acc->getAccName(), "TestEQ");
+        ASSERT_EQ(acc->getAccDesc(), "Test of equity");
+        ASSERT_EQ(acc->getAccType(), REVENUE);
+    }
+
+
+}
+
+
+
+TEST_F(ChartOfAccountsTest, COA_Add_Revenue){
+    ASSERT_EQ(coa.CreateAccount(4000,"AP","Accounts Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(4500,"Debt","Bank Debt"),0);
+    ASSERT_EQ(coa.CreateAccount(4999,"Taxes Payable","Corperate Taxes Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(5000, "TestEQ", "Test of equity"),0);
+
+    
+    // Check for acc# 4000
+    status = coa.getAccount(4000,&acc);
+    
+    ASSERT_EQ(status,0) << "Cannot find the account 4000, skipping the account checks";
+    
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 4000);
+        ASSERT_EQ(acc->getAccName(), "AP");
+        ASSERT_EQ(acc->getAccDesc(), "Accounts Payable");
+        ASSERT_EQ(acc->getAccType(), REVENUE);
+    }
+
+    // Check for acc# 4500
+    status = coa.getAccount(4500,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 4500, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 4500);
+        ASSERT_EQ(acc->getAccName(), "Debt");
+        ASSERT_EQ(acc->getAccDesc(), "Bank Debt");
+        ASSERT_EQ(acc->getAccType(), REVENUE);
+    }
+
+
+    // Check for acc# 4999
+    status = coa.getAccount(4999,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 4999, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 4999);
+        ASSERT_EQ(acc->getAccName(), "Taxes Payable");
+        ASSERT_EQ(acc->getAccDesc(), "Corperate Taxes Payable");
+        ASSERT_EQ(acc->getAccType(), REVENUE);
+    }
+
+
+    status = coa.getAccount(5000,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 5000, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 5000);
+        ASSERT_EQ(acc->getAccName(), "TestEQ");
+        ASSERT_EQ(acc->getAccDesc(), "Test of equity");
+        ASSERT_EQ(acc->getAccType(), EXPENSE);
+    }
+
+
+}
+
+TEST_F(ChartOfAccountsTest, COA_Add_Expense){
+    ASSERT_EQ(coa.CreateAccount(5000,"AP","Accounts Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(5503,"Debt","Bank Debt"),0);
+    ASSERT_EQ(coa.CreateAccount(9999,"Taxes Payable","Corperate Taxes Payable"),0);
+    ASSERT_EQ(coa.CreateAccount(6234, "TestEQ", "Test of equity"),0);
+    ASSERT_EQ(coa.CreateAccount(10000, "TestEQ", "Test of equity"),2) << "acc 10 000 should be out of range";
+
+
+    
+    // Check for acc# 5000
+    status = coa.getAccount(5000,&acc);
+    
+    ASSERT_EQ(status,0) << "Cannot find the account 5000, skipping the account checks";
+    
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 5000);
+        ASSERT_EQ(acc->getAccName(), "AP");
+        ASSERT_EQ(acc->getAccDesc(), "Accounts Payable");
+        ASSERT_EQ(acc->getAccType(), EXPENSE);
+    }
+
+    // Check for acc# 5503
+    status = coa.getAccount(5503,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 5503, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 5503);
+        ASSERT_EQ(acc->getAccName(), "Debt");
+        ASSERT_EQ(acc->getAccDesc(), "Bank Debt");
+        ASSERT_EQ(acc->getAccType(), EXPENSE);
+    }
+
+
+    // Check for acc# 9999
+    status = coa.getAccount(9999,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 9999, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 9999);
+        ASSERT_EQ(acc->getAccName(), "Taxes Payable");
+        ASSERT_EQ(acc->getAccDesc(), "Corperate Taxes Payable");
+        ASSERT_EQ(acc->getAccType(), EXPENSE);
+    }
+
+
+    status = coa.getAccount(6234,&acc);
+    ASSERT_EQ(status,0) << "Cannot find account 6234, skipping the account checks";
+    if (status == 0) {
+        ASSERT_EQ(acc->getAccNum(), 6234);
+        ASSERT_EQ(acc->getAccName(), "TestEQ");
+        ASSERT_EQ(acc->getAccDesc(), "Test of equity");
+        ASSERT_EQ(acc->getAccType(), EXPENSE);
+    }
+
+
+}
+
+TEST_F(ChartOfAccountsTest, COA_EmptyList){
+    ASSERT_EQ(coa.getAccount(1000,&acc),1);
+    ASSERT_EQ(coa.getAccount(2353,&acc),1);
+    ASSERT_EQ(coa.getAccount(3478,&acc),1);
+    ASSERT_EQ(coa.getAccount(4345,&acc),1);
+    ASSERT_EQ(coa.getAccount(5834,&acc),1);
+}
+
+TEST_F(ChartOfAccountsTest, COA_CreateAccNumberAlreadyExsists){
+    ASSERT_EQ(coa.CreateAccount(1000,"Asset","Asset"),0);
+    ASSERT_EQ(coa.CreateAccount(2000,"Liability","Liability"),0);
+    ASSERT_EQ(coa.CreateAccount(3000,"Equity","Equity"),0);
+    ASSERT_EQ(coa.CreateAccount(4000,"Revenue","Revenue"),0);
+    ASSERT_EQ(coa.CreateAccount(5000,"Exepense","Exepense"),0);
+
+
+    ASSERT_EQ(coa.CreateAccount(1000,"Asset","Asset"),1);
+    ASSERT_EQ(coa.CreateAccount(2000,"Liability","Liability"),1);
+    ASSERT_EQ(coa.CreateAccount(3000,"Equity","Equity"),1);
+    ASSERT_EQ(coa.CreateAccount(4000,"Revenue","Revenue"),1);
+    ASSERT_EQ(coa.CreateAccount(5000,"Exepense","Exepense"),1);
+
+}
 
 int main(int argc, char* argv[]){
     testing::InitGoogleTest(&argc, argv);
