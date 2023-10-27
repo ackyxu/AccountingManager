@@ -7,7 +7,7 @@
 class AccountCreator{
 
     public:
-        Accounts* CreateAccount(int accNum, string accName, string accDesc, AccountType accType, bool group=false);
+        Accounts* CreateAccount(int accNum, string accName, string accDesc, AccountType accType, bool group, int groupNUM, bool active);
 };
 
 #endif

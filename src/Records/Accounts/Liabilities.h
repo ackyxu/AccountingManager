@@ -7,6 +7,6 @@ using std::string;
 class Liabilities : public Accounts {
 
     public:
-        Liabilities(int accNum, string accName, string accDesc);
+        Liabilities(int accNum, string accName, string accDesc, AccountType accType, bool group, int groupNUM, bool active);
 
 };

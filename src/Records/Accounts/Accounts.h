@@ -12,7 +12,7 @@ class Accounts {
         float accAmt = 0;
     
     public:
-        Accounts(int accNum, string accName, string accDesc, AccountType accType);
+        Accounts(int accNum, string accName, string accDesc, AccountType accType, bool group, int groupNUM, bool active);
         int getAccNum();
         string getAccName();
         string getAccDesc();

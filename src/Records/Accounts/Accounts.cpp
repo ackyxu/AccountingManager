@@ -1,6 +1,6 @@
 #include <Accounts.h>
 
-Accounts::Accounts(int accNum, string accName, string accDesc, AccountType accType) {
+Accounts::Accounts(int accNum, string accName, string accDesc, AccountType accType, bool group, int groupNUM, bool active) {
     this->accNum = accNum;
     this->accName = accName;
     this->accDesc = accDesc;

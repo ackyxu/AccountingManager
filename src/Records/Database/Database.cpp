@@ -1,8 +1,9 @@
 #include <Database.h>
 #include <iostream>
 #include <filesystem>
-// #include <pqxx/pqxx>
 
+using Record = std::vector<std::string>;
+using Records = std::vector<Record>;
 
 int Database::connectDatabase(std::string filename) {
     int rc = -1;
@@ -23,6 +24,11 @@ int Database::connectDatabase(std::string filename) {
 }
 
 
+
+
+
+
+
 int Database::createDatabase(std::string filename) {
     if(connected){
         sqlite3_filename filename = sqlite3_db_filename(db, NULL);
@@ -32,6 +38,7 @@ int Database::createDatabase(std::string filename) {
     } else if(std::filesystem::exists(filename) == false) {
         int rc = sqlite3_open(filename.c_str(), &db);
         if(rc == SQLITE_OK) {
+            Database::setupDatabase();
             std::cout << "database file created: " << filename << std::endl;
             connected = true;
             return 0;
@@ -50,6 +57,31 @@ int Database::createDatabase(std::string filename) {
 
 }
 
+
+void Database::setupDatabase(){
+
+    std::string sql;
+    char* errmsg;
+
+    sql =       "CREATE TABLE COA ("  \
+                            "ACCNUM INT PRIMARY KEY     NOT NULL," \
+                            "ACCNAME        TEXT        NOT NULL," \
+                            "ACCDESC        TEXT        NOT NULL," \
+                            "ACCTYPE        INT         NOT NULL," \
+                            "ACCGROUP       INT         NOT NULL," \
+                            "GRPNUM         INT," \
+                            "ACTIVE         INT         NOT NULL);";
+                            // "FOREIGN KEY (GRPNUM) REFERENCES COA(ACCNUM)," \
+
+
+    int ret = sqlite3_exec(db,sql.c_str(),NULL,NULL,&errmsg);
+    if (errmsg != NULL){
+        std::cout << "Stats Code for Setup:" << errmsg << std::endl;
+    }
+        
+
+}
+
 int Database::closeDatabase(){
     if(connected){
         connected = false;
@@ -60,4 +92,64 @@ int Database::closeDatabase(){
     }
     
 }
+
+int Database::selectCallback(void *p_data, int num_fields, char **p_fields, char **p_col_names){
+    Records* records = static_cast<Records*>(p_data);
+
+    try {
+        records->emplace_back(p_fields, p_fields + num_fields);
+    }
+    catch (...) {
+    // abort select on failure, don't let exception propogate thru sqlite3 call-stack
+        return 1;
+    }
+  return 0;
+}
+
+//  https://stackoverflow.com/questions/18839799/retrieve-sqlite-table-data-in-c
+Records Database::query(std::string sql) {
+    char* errmsg;
+    Records records;
+    int ret = sqlite3_exec(db, sql.c_str(), Database::selectCallback, &records, &errmsg);
+
+    if (ret != SQLITE_OK) {
+    std::cerr << "Error in select statement " << sql << "[" << errmsg << "]\n";
+    }
+    else {
+    // std::cerr << records.size() << " records returned.\n";
+    }
+
+    return records;
+}
+
+int Database::insert(std::string sql) {
+    char* errmsg;
+    int ret = sqlite3_exec(db, sql.c_str(),NULL,NULL,&errmsg);
+    if (ret != SQLITE_OK) {
+        std::cerr << "Error in insert statement " << sql << "[" << errmsg << "]" << std::endl;
+    }
+    else {
+        std::cerr << "Insertion Success" << std::endl;
+    }
+
+    return ret;
+}
+
+
+int Database::update(std::string sql) {
+    char* errmsg;
+    int ret = sqlite3_exec(db, sql.c_str(),NULL,NULL,&errmsg);
+    if (ret != SQLITE_OK) {
+        std::cerr << "Error in update statement " << sql << "[" << errmsg << "]" << std::endl;
+    }
+    else {
+        std::cerr << "Insertion Success" << std::endl;
+    }
+
+    return ret;
+}
+
+
+    
+
 
