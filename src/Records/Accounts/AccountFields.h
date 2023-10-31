@@ -1,0 +1,2 @@
+#pragma once
+static enum AccountFields {ACCNUM, ACCNAME, ACCDESC, ACCTYPE, GROUP, GROUPNUM,ACTIVE,ACCAMT};

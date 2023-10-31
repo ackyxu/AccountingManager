@@ -22,7 +22,7 @@ int main(int, char**){
     
 
     
-    ChartOfAccounts coa;
+    ChartOfAccounts coa(db);
 
 
 
@@ -42,13 +42,16 @@ int main(int, char**){
     // }
 
     std::string sql = "SELECT name FROM sqlite_schema WHERE type='table';";
-    records = db.query(sql);
-    std::cout << "Records Size: " << records.size() << std::endl;
-    for (auto record: records) {
-        for (auto row: record) std::cout << row << std::endl;
-    } 
-    std::string sql2 = "SELECT * FROM COA;";
-    records = db.query(sql2);
+    int ret = db.query(sql, NULL);
+    // std::cout << "Records Size: " << records.size() << std::endl;
+    // for (auto record: records) {
+    //     for (auto row: record) std::cout << row << std::endl;
+    // } 
+    
+    std::string sql2 = "SELECT * FROM COA ORDER BY ACCNUM;";
+    records.clear();
+    ret = db.query(sql2, &records);
+    std::cout << "ret select all: " << ret << std::endl;
     std::cout << "Records Size: " << records.size() << std::endl;
     for (auto record: records) {
         for (auto row: record) std::cout << row << " ";

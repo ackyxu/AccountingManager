@@ -21,7 +21,7 @@ class Database {
     int connectDatabase(std::string filename);
     int closeDatabase();
     int createDatabase(std::string filename);
-    Records query(std::string sql);
+    int query(std::string sql, Records* records);
     int insert(std::string sql);
     int update(std::string sql);
     // int CreateDatabase();

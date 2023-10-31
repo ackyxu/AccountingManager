@@ -107,19 +107,17 @@ int Database::selectCallback(void *p_data, int num_fields, char **p_fields, char
 }
 
 //  https://stackoverflow.com/questions/18839799/retrieve-sqlite-table-data-in-c
-Records Database::query(std::string sql) {
+int Database::query(std::string sql, Records* records) {
     char* errmsg;
-    Records records;
-    int ret = sqlite3_exec(db, sql.c_str(), Database::selectCallback, &records, &errmsg);
-
+    int ret;
+    if(records == NULL) ret = sqlite3_exec(db, sql.c_str(),NULL,NULL,&errmsg);
+    else ret = sqlite3_exec(db, sql.c_str(), Database::selectCallback, records, &errmsg);
     if (ret != SQLITE_OK) {
-    std::cerr << "Error in select statement " << sql << "[" << errmsg << "]\n";
+        std::cerr << "Error in select statement " << sql << "[" << errmsg << "]\n";
+        return 1;
+    } else {
+        return SQLITE_OK;
     }
-    else {
-    // std::cerr << records.size() << " records returned.\n";
-    }
-
-    return records;
 }
 
 int Database::insert(std::string sql) {

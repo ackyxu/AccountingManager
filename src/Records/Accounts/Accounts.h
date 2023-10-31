@@ -9,6 +9,9 @@ class Accounts {
         string accName;
         string accDesc;
         AccountType accType;
+        bool group;
+        int groupNum;
+        bool active;
         float accAmt = 0;
     
     public:

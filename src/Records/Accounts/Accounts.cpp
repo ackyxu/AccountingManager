@@ -5,6 +5,9 @@ Accounts::Accounts(int accNum, string accName, string accDesc, AccountType accTy
     this->accName = accName;
     this->accDesc = accDesc;
     this->accType = accType;
+    this->group = group;
+    this->groupNum = groupNum;
+    this->active = active;
 }
 
 int Accounts::getAccNum(){
@@ -21,3 +24,5 @@ string Accounts::getAccDesc(){
 AccountType Accounts::getAccType(){
     return accType;
 }
+
+
