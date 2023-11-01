@@ -4,6 +4,8 @@
 #include <string.h>
 #include <vector>
 #include <stdio.h>
+#include <AccountFields.h>
+#include <AccountType.h>
 #include <ChartOfAccounts.h>
 
 
@@ -402,6 +404,143 @@ TEST_F(ChartOfAccountsTest, COA_DataPresistenceAccounts){
     ASSERT_EQ(coa->CreateAccount(db,3000,"Equity","Equity"),2);
     ASSERT_EQ(coa->CreateAccount(db,4000,"Revenue","Revenue"),2);
     ASSERT_EQ(coa->CreateAccount(db,5000,"Exepense","Exepense"),2);
+
+}
+
+
+
+TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCNUM){
+    ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","Asset"),0);
+
+
+    // Check ACCNUM update within same Type 
+    coa->getAccount(1000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",1500),0);
+    ASSERT_EQ(coa->getAccount(1000,&acc),1);
+
+    // ASSERT_EQ(coa->getAccount(1500,&acc),0);
+    ASSERT_EQ(acc->getAccNum(), 1500);
+    ASSERT_EQ(acc->getAccName(), "Asset");
+    ASSERT_EQ(acc->getAccDesc(), "Asset");
+    ASSERT_EQ(acc->getAccType(), ASSET);
+
+    // Reset Acc 1000
+    ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","Asset"),0);
+
+    // Check that duplciateACCNUM update is not possible
+    coa->getAccount(1000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",1500),2);
+    ASSERT_EQ(coa->getAccount(1000,&acc),0) << "Nothing should be updated since we don't allow duplicate ACCNUM";
+
+
+    // Check ACCNUM update with different Type
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",2500),0);
+    ASSERT_EQ(coa->getAccount(1000,&acc),1);
+    ASSERT_EQ(coa->getAccount(2500,&acc),0);
+    ASSERT_EQ(acc->getAccNum(), 2500);
+    ASSERT_EQ(acc->getAccName(), "Asset");
+    ASSERT_EQ(acc->getAccDesc(), "Asset");
+    ASSERT_EQ(acc->getAccType(), LIABILITY);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",3500),0);
+    ASSERT_EQ(coa->getAccount(2500,&acc),1);
+    ASSERT_EQ(coa->getAccount(3500,&acc),0);
+    ASSERT_EQ(acc->getAccNum(), 3500);
+    ASSERT_EQ(acc->getAccName(), "Asset");
+    ASSERT_EQ(acc->getAccDesc(), "Asset");
+    ASSERT_EQ(acc->getAccType(), EQUITY);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",4500),0);
+    ASSERT_EQ(coa->getAccount(3500,&acc),1);
+    ASSERT_EQ(coa->getAccount(4500,&acc),0);
+    ASSERT_EQ(acc->getAccNum(), 4500);
+    ASSERT_EQ(acc->getAccName(), "Asset");
+    ASSERT_EQ(acc->getAccDesc(), "Asset");
+    ASSERT_EQ(acc->getAccType(), REVENUE);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",5500),0);
+    ASSERT_EQ(coa->getAccount(4500,&acc),1);
+    ASSERT_EQ(acc->getAccNum(), 5500);
+    ASSERT_EQ(acc->getAccName(), "Asset");
+    ASSERT_EQ(acc->getAccDesc(), "Asset");
+    ASSERT_EQ(acc->getAccType(), EXPENSE);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",9999),0);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",10000),3);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",9999),2);
+    ASSERT_EQ(acc->getAccNum(), 9999);
+
+}
+
+TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCNUM_Boundaries){
+
+    ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","Asset"),0);
+    coa->getAccount(1000,&acc);
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",999),3);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",1001),0);
+    ASSERT_EQ(acc->getAccType(), ASSET);
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",1999),0);
+    ASSERT_EQ(coa->getAccount(1999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), ASSET);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",2000),0);
+    ASSERT_EQ(coa->getAccount(2000,&acc),0);
+    ASSERT_EQ(acc->getAccType(), LIABILITY);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",1999),0);
+    ASSERT_EQ(coa->getAccount(1999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), ASSET);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",2001),0);
+    ASSERT_EQ(coa->getAccount(2001,&acc),0);
+    ASSERT_EQ(acc->getAccType(), LIABILITY);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",2999),0);
+    ASSERT_EQ(coa->getAccount(2999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), LIABILITY);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",3000),0);
+    ASSERT_EQ(coa->getAccount(3000,&acc),0);
+    ASSERT_EQ(acc->getAccType(), EQUITY);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",2999),0);
+    ASSERT_EQ(coa->getAccount(2999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), LIABILITY);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",3001),0);
+    ASSERT_EQ(coa->getAccount(3001,&acc),0);
+    ASSERT_EQ(acc->getAccType(), EQUITY);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",3999),0);
+    ASSERT_EQ(coa->getAccount(3999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), EQUITY);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",4000),0);
+    ASSERT_EQ(coa->getAccount(4000,&acc),0);
+    ASSERT_EQ(acc->getAccType(), REVENUE);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",3999),0);
+    ASSERT_EQ(coa->getAccount(3999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), EQUITY);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",4001),0);
+    ASSERT_EQ(coa->getAccount(4001,&acc),0);
+    ASSERT_EQ(acc->getAccType(), REVENUE);
+
+
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",4999),0);
+    ASSERT_EQ(coa->getAccount(4999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), REVENUE);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",5000),0);
+    ASSERT_EQ(coa->getAccount(5000,&acc),0);
+    ASSERT_EQ(acc->getAccType(), EXPENSE);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",4999),0);
+    ASSERT_EQ(coa->getAccount(4999,&acc),0);
+    ASSERT_EQ(acc->getAccType(), REVENUE);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",5001),0);
+    ASSERT_EQ(coa->getAccount(5001,&acc),0);
+    ASSERT_EQ(acc->getAccType(), EXPENSE);
 
 }
 

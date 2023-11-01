@@ -23,6 +23,9 @@ class ChartOfAccounts{
         inline static const std::string TableName = "COA";
         AccountType getAccountTypeByNum(int accnum);
         int getCOAFromDB();
+        int updateACCNUM(Accounts** acc, int newAccNum);
+        int updateStrFieldsAccount(Accounts* acc, AccountFields field, string strVal);
+        int updateFltFieldsAccount(Accounts* acc, AccountFields field, float fltVal);
     
 
     public:
@@ -32,8 +35,7 @@ class ChartOfAccounts{
                         pair<int,int> expenseRange = {5000,9999});
         int CreateAccount(Database db, int accNum, string accName, string accDesc, bool group=false, int groupID = 0);
         int getAccount(int accNum, Accounts** acc);
-        int updateAccount(Database db, Accounts* acc, AccountFields field, string stringVal = NULL, int intVal = NULL, float floatVal = NULL);
-
+        int updateAccount(Accounts** acc, AccountFields field, string stringVal = NULL, int intVal = NULL, float floatVal = NULL);
 };
 
 

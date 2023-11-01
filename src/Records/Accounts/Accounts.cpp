@@ -26,3 +26,18 @@ AccountType Accounts::getAccType(){
 }
 
 
+
+bool Accounts::getGroup(){
+    return group;
+}
+
+
+int Accounts::getGroupNUM(){
+    return groupNum;
+}
+
+bool Accounts::getActiveStatus(){
+    return active;
+}
+
+

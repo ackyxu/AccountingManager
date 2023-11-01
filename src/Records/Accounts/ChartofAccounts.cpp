@@ -82,43 +82,63 @@ int ChartOfAccounts::getAccount(int accNum, Accounts** acc){
 }
 
 
-// int ChartOfAccounts::updateAccount(Database db, Accounts* acc, AccountFields field, string stringVal, int intVal, float floatVal){
-//     int ret;
-//     string sql;
-//     switch(field){
-//         case ACCNUM:
-//             if (intVal == NULL) return 2;
-//             sql = "UPDATE COA SET ACCNUM = " + std::to_string(intVal) + "  WHERE ACCNUM = " + std::to_string(acc->getAccNum());
-//             ret = db.query(sql, NULL);
-//             if (ret == 0){
-//                 delete acc;
-//                 ret = getAccount(db, intVal, &acc);
-//             }
-//             return ret;
-//         case ACCNAME:
-//             break;
-//         case ACCDESC:
-//             break;
-//         case ACCTYPE:
-//             break;
-//         case GROUP:
-//             break;
-//         case GROUPNUM:
-//             break;
-//         case ACTIVE:
-//             break;
-//         case ACCAMT:
-//             break;
+int ChartOfAccounts::updateAccount(Accounts** acc, AccountFields field, string stringVal, int intVal, float floatVal){
+    switch(field){
+        case ACCNUM:
+            
+            if(intVal != NULL){
+                return updateACCNUM(acc, intVal);
+            } else return -1;
+            
+        case ACCNAME:
+            break;
+        case ACCDESC:
+            break;
+        case ACCTYPE:
+            break;
+        case GROUP:
+            break;
+        case GROUPNUM:
+            break;
+        case ACTIVE:
+            break;
+        case ACCAMT:
+            break;
         
-//         default:
-//             std::cout << "Error with the name of the field selected: Does not exsist" << std::endl;
-//             return -1;
+        default:
+            std::cout << "Error with the name of the field selected: Does not exsist" << std::endl;
+            return -1;
 
-//     }
+    }
 
-//     return 1;
+    return 1;
 
 
-// }
+}
+
+
+
+
+int ChartOfAccounts::updateACCNUM(Accounts** acc, int newAccNum){
+        AccountType newAccType = getAccountTypeByNum(newAccNum);
+        if(coa.find(newAccNum) == coa.end() && newAccType != INVALID){
+            AccountCreator ac;
+            std::string sql = "UPDATE " + TableName + " SET ACCNUM = " + std::to_string(newAccNum) + ",  ACCTYPE = " + 
+                                    std::to_string((int)newAccType) + " WHERE ACCNUM = " + std::to_string((*acc)->getAccNum()) +";";
+            int ret = db.query(sql, NULL);
+            if(ret == SQLITE_OK){
+                Accounts* newACC = ac.CreateAccount(newAccNum, (*acc)->getAccName(), (*acc)->getAccDesc(), 
+                                                    newAccType, (*acc)->getGroup(), (*acc)->getGroupNUM(), (*acc)->getActiveStatus());
+                coa.erase((*acc)->getAccNum());
+                delete *acc;
+                coa[newAccNum] = newACC;
+                *acc = newACC;
+                return 0;
+            } else return ret;
+
+        } else if (newAccType == INVALID) return 3;
+        else return 2;
+
+}
 
                             

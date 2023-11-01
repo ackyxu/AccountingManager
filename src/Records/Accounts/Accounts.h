@@ -20,5 +20,8 @@ class Accounts {
         string getAccName();
         string getAccDesc();
         AccountType getAccType();
+        bool getGroup();
+        int getGroupNUM();
+        bool getActiveStatus();
 
 };
