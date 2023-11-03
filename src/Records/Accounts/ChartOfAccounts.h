@@ -24,8 +24,12 @@ class ChartOfAccounts{
         AccountType getAccountTypeByNum(int accnum);
         int getCOAFromDB();
         int updateACCNUM(Accounts** acc, int newAccNum);
-        int updateStrFieldsAccount(Accounts* acc, AccountFields field, string strVal);
+        int updateACCNAME(Accounts** acc, string newAccName);
+        int updateACCDESC(Accounts** acc, string newAccDesc);
+        int updateGROUPNUM(Accounts** acc, int newGroupNum);
         int updateFltFieldsAccount(Accounts* acc, AccountFields field, float fltVal);
+        int updateActiveStatus(Accounts** acc, int activeStatus);
+
     
 
     public:
@@ -33,7 +37,8 @@ class ChartOfAccounts{
                         pair<int,int> assetRange = {1000,1999}, pair<int,int> liabilityRange = {2000,2999},
                         pair<int,int> equityRange = {3000,3999},pair<int,int> revenueRange = {4000,4999},
                         pair<int,int> expenseRange = {5000,9999});
-        int CreateAccount(Database db, int accNum, string accName, string accDesc, bool group=false, int groupID = 0);
+        int forceSyncCOA();
+        int CreateAccount(Database db, int accNum, string accName, string accDesc, bool group=false, int groupID = 0, bool groupHeader = false);
         int getAccount(int accNum, Accounts** acc);
         int updateAccount(Accounts** acc, AccountFields field, string stringVal = NULL, int intVal = NULL, float floatVal = NULL);
 };

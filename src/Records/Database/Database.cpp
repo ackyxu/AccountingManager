@@ -68,6 +68,7 @@ void Database::setupDatabase(){
                             "ACCNAME        TEXT        NOT NULL," \
                             "ACCDESC        TEXT        NOT NULL," \
                             "ACCTYPE        INT         NOT NULL," \
+                            "ACCHEADER      INT         NOT NULL," \
                             "ACCGROUP       INT         NOT NULL," \
                             "GRPNUM         INT," \
                             "ACTIVE         INT         NOT NULL);";

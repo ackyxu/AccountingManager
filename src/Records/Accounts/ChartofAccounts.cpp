@@ -29,9 +29,9 @@ AccountType ChartOfAccounts::getAccountTypeByNum(int accNum){
     else return INVALID;
 }
 
-int ChartOfAccounts::CreateAccount(Database db, int accNum, string accName, string accDesc, bool group, int groupID){
+int ChartOfAccounts::CreateAccount(Database db, int accNum, string accName, string accDesc, bool group, int groupID, bool groupHeader){
     std::string  sql =      "INSERT INTO " + TableName + " "
-                            + "(ACCNUM,ACCNAME,ACCDESC,ACCTYPE,ACCGROUP,GRPNUM,ACTIVE) VALUES ( "; 
+                            + "(ACCNUM,ACCNAME,ACCDESC,ACCTYPE,ACCHEADER,ACCGROUP,GRPNUM,ACTIVE) VALUES ( "; 
     if(coa.find(accNum) == coa.end()) {
         AccountType accType = getAccountTypeByNum(accNum);
         if (accType == INVALID) return 3;
@@ -40,6 +40,7 @@ int ChartOfAccounts::CreateAccount(Database db, int accNum, string accName, stri
                 + "'" + accName + "'" + ","
                 + "'" + accDesc + "'" + ","
                 + "'" + std::to_string(accType) + "'" + ","
+                + (groupHeader ? "1": "0") + ","
                 + (group ? "1": "0") + ","
                 + (group ? std::to_string(groupID) : "0") + ","
                 + "1" + ");";
@@ -48,6 +49,8 @@ int ChartOfAccounts::CreateAccount(Database db, int accNum, string accName, stri
                 coa[accNum] = ac.CreateAccount(accNum, accName, accDesc, accType, group,(group ? groupID : 0),true);
                 return 0;
             } else return 1;
+
+            //TODO: Get AMT value from JE when implemented
         }
 
     } else return 2;
@@ -70,6 +73,15 @@ int ChartOfAccounts::getCOAFromDB(){
 }
 
 
+int ChartOfAccounts::forceSyncCOA(){
+    for(auto const& pairs: coa){
+        delete pairs.second;
+    }
+    coa.clear();
+    return getCOAFromDB();
+}
+
+
 
 int ChartOfAccounts::getAccount(int accNum, Accounts** acc){
     if(coa.find(accNum) != coa.end()) {
@@ -85,25 +97,35 @@ int ChartOfAccounts::getAccount(int accNum, Accounts** acc){
 int ChartOfAccounts::updateAccount(Accounts** acc, AccountFields field, string stringVal, int intVal, float floatVal){
     switch(field){
         case ACCNUM:
-            
             if(intVal != NULL){
                 return updateACCNUM(acc, intVal);
             } else return -1;
             
         case ACCNAME:
-            break;
+            if(stringVal != ""){
+                return updateACCNAME(acc, stringVal);
+            } else return -1;
         case ACCDESC:
-            break;
+            if(stringVal != ""){
+                return updateACCDESC(acc, stringVal);
+            } else return -1;
         case ACCTYPE:
-            break;
+            std::cout << "Please changed the type of the account by changing the Account Number" <<std::endl;
+            return 2;
         case GROUP:
-            break;
+            std::cout << "Please changed the Group of the account by changing the Group Number" <<std::endl;
+            return 2;
         case GROUPNUM:
-            break;
+            return updateGROUPNUM(acc, intVal);
         case ACTIVE:
-            break;
+            if(intVal == 0 or intVal == 1){
+                return updateActiveStatus(acc, intVal);
+            } else {
+                std::cout << "Check intVal, should be 1 or 0" << std::endl;
+            }
         case ACCAMT:
-            break;
+            std::cout << "Cannot set amount from COA" <<std::endl;
+            return -1;
         
         default:
             std::cout << "Error with the name of the field selected: Does not exsist" << std::endl;
@@ -139,6 +161,110 @@ int ChartOfAccounts::updateACCNUM(Accounts** acc, int newAccNum){
         } else if (newAccType == INVALID) return 3;
         else return 2;
 
+}
+
+
+int ChartOfAccounts::updateACCNAME(Accounts** acc, string newAccName){
+        if(newAccName != ""){
+            AccountCreator ac;
+            std::string sql = "UPDATE " + TableName + " SET ACCNAME = '" + newAccName +  "' WHERE ACCNUM = " + std::to_string((*acc)->getAccNum()) +";";
+            int ret = db.query(sql, NULL);
+            if(ret == SQLITE_OK){
+                Accounts* newACC = ac.CreateAccount((*acc)->getAccNum(), newAccName, (*acc)->getAccDesc(), 
+                                                    (*acc)->getAccType(), (*acc)->getGroup(), (*acc)->getGroupNUM(), (*acc)->getActiveStatus());
+                int oldAccNum = (*acc)->getAccNum();
+                coa.erase((*acc)->getAccNum());
+                delete *acc;
+                coa[oldAccNum] = newACC;
+                *acc = newACC;
+                return 0;
+            } else return ret;
+
+        } else return 2;
+  
+}
+
+
+
+int ChartOfAccounts::updateACCDESC(Accounts** acc, string newAccDesc){
+        if(newAccDesc != ""){
+            AccountCreator ac;
+            std::string sql = "UPDATE " + TableName + " SET ACCDESC = '" + newAccDesc +  "' WHERE ACCNUM = " + std::to_string((*acc)->getAccNum()) +";";
+            int ret = db.query(sql, NULL);
+            if(ret == SQLITE_OK){
+                Accounts* newACC = ac.CreateAccount((*acc)->getAccNum(), (*acc)->getAccDesc(), newAccDesc, 
+                                                    (*acc)->getAccType(), (*acc)->getGroup(), (*acc)->getGroupNUM(), (*acc)->getActiveStatus());
+                int oldAccNum = (*acc)->getAccNum();
+                coa.erase((*acc)->getAccNum());
+                delete *acc;
+                coa[oldAccNum] = newACC;
+                *acc = newACC;
+                return 0;
+            } else return ret;
+
+        } else return 2;
+  
+}
+
+
+int ChartOfAccounts::updateGROUPNUM(Accounts** acc, int newGroupNum){
+    int oldAccNum = (*acc)->getAccNum();
+    if(newGroupNum == 0){
+        AccountCreator ac;
+        std::string sql = "UPDATE " + TableName + " SET ACCGROUP = 0, GRPNUM = 0 WHERE ACCNUM = " + std::to_string(oldAccNum) +";";
+        int ret = db.query(sql, NULL);
+        if(ret == SQLITE_OK){
+            Accounts* newACC = ac.CreateAccount((*acc)->getAccNum(), (*acc)->getAccDesc(), (*acc)->getAccDesc(), 
+                                                (*acc)->getAccType(), false, 0, (*acc)->getActiveStatus());
+            coa.erase((*acc)->getAccNum());
+            delete *acc;
+            coa[oldAccNum] = newACC;
+            *acc = newACC;
+            return 0;
+        } else return ret;
+
+    } else if(coa.find(newGroupNum) != coa.end()) {
+        if (newGroupNum >= oldAccNum or getAccountTypeByNum(newGroupNum) != getAccountTypeByNum(oldAccNum)) return 3;
+        AccountCreator ac;
+        std::string sql = "UPDATE " + TableName + " SET ACCGROUP = 1, GRPNUM = " + std::to_string(newGroupNum) + " WHERE ACCNUM = " + std::to_string(oldAccNum) +";";
+        int ret = db.query(sql, NULL);
+        
+        if(ret == SQLITE_OK){
+
+            Accounts* newACC = ac.CreateAccount((*acc)->getAccNum(), (*acc)->getAccDesc(), (*acc)->getAccDesc(), 
+                                                (*acc)->getAccType(), true, newGroupNum, (*acc)->getActiveStatus());
+            
+            coa.erase(oldAccNum);
+            delete *acc;
+            coa[oldAccNum] = newACC;
+            *acc = newACC;
+            return 0;
+        } else return ret;
+
+    } else return 2;
+}
+
+// Takes in a int that is 1 or 0, to represent bool
+int ChartOfAccounts::updateActiveStatus(Accounts** acc, int activeStatus){
+    if (activeStatus == 1 or activeStatus == 0){  
+        if ((bool)activeStatus == (*acc)->getActiveStatus()) return 3;
+        AccountCreator ac;
+        std::string sql = "UPDATE " + TableName + " SET ACTIVE = " + std::to_string(activeStatus) +  " WHERE ACCNUM = " + std::to_string((*acc)->getAccNum()) +";";
+        int ret = db.query(sql, NULL);
+  
+        if (ret == SQLITE_OK){
+            Accounts* newACC = ac.CreateAccount((*acc)->getAccNum(), (*acc)->getAccDesc(), (*acc)->getAccDesc(), 
+                                    (*acc)->getAccType(), (*acc)->getGroup(), (*acc)->getGroupNUM(), (bool)activeStatus);
+            int oldAccNum = (*acc)->getAccNum();
+            coa.erase(oldAccNum);
+            delete *acc;
+            coa[oldAccNum] = newACC;
+            *acc = newACC;
+            return 0;
+
+        } else return ret;
+
+    } else return 2;
 }
 
                             

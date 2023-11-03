@@ -1,13 +1,14 @@
 #include <Accounts.h>
 
-Accounts::Accounts(int accNum, string accName, string accDesc, AccountType accType, bool group, int groupNUM, bool active) {
+Accounts::Accounts(int accNum, string accName, string accDesc, AccountType accType, bool group, int grpNUM, bool active, bool groupHeader) {
     this->accNum = accNum;
     this->accName = accName;
     this->accDesc = accDesc;
     this->accType = accType;
     this->group = group;
-    this->groupNum = groupNum;
+    this->groupNum = grpNUM;
     this->active = active;
+    this->groupHeader = groupHeader;
 }
 
 int Accounts::getAccNum(){

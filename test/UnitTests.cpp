@@ -417,6 +417,7 @@ TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCNUM){
     coa->getAccount(1000,&acc);
     ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",1500),0);
     ASSERT_EQ(coa->getAccount(1000,&acc),1);
+    ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",NULL),-1);
 
     // ASSERT_EQ(coa->getAccount(1500,&acc),0);
     ASSERT_EQ(acc->getAccNum(), 1500);
@@ -476,6 +477,13 @@ TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCNUM){
     ASSERT_EQ(coa->updateAccount(&acc,ACCNUM,"",9999),2);
     ASSERT_EQ(acc->getAccNum(), 9999);
 
+
+    coa->forceSyncCOA();
+    ASSERT_EQ(coa->getAccount(9999,&acc),0);
+    ASSERT_EQ(acc->getAccNum(), 9999);
+    ASSERT_EQ(acc->getAccName(), "Asset");
+    ASSERT_EQ(acc->getAccDesc(), "Asset");
+    ASSERT_EQ(acc->getAccType(), EXPENSE);
 }
 
 TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCNUM_Boundaries){
@@ -543,6 +551,152 @@ TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCNUM_Boundaries){
     ASSERT_EQ(acc->getAccType(), EXPENSE);
 
 }
+
+TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCNAME){
+    ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","Asset"),0);
+    ASSERT_EQ(coa->CreateAccount(db,2000,"Liability","Liability"),0);
+    ASSERT_EQ(coa->CreateAccount(db,3000,"Equity","Equity"),0);
+    ASSERT_EQ(coa->CreateAccount(db,4000,"Revenue","Revenue"),0);
+    ASSERT_EQ(coa->CreateAccount(db,5000,"Exepense","Exepense"),0);
+
+
+    coa->getAccount(1000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCNAME, "NewAsset"),0);
+    ASSERT_EQ(coa->getAccount(1000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewAsset");
+
+
+    coa->getAccount(2000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCNAME, "NewLia"),0);
+    ASSERT_EQ(coa->getAccount(2000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewLia");
+
+    coa->getAccount(3000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCNAME, "NewEquity"),0);
+    ASSERT_EQ(coa->getAccount(3000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewEquity");
+    
+    coa->getAccount(4000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCNAME, "NewRev"),0);
+    ASSERT_EQ(coa->getAccount(4000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewRev");
+
+    coa->getAccount(5000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCNAME, "NewExp"),0);
+    ASSERT_EQ(coa->getAccount(5000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewExp");
+
+
+    coa->forceSyncCOA();
+    ASSERT_EQ(coa->getAccount(1000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewAsset");   
+
+    ASSERT_EQ(coa->getAccount(2000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewLia");
+
+    ASSERT_EQ(coa->getAccount(3000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewEquity");
+
+    ASSERT_EQ(coa->getAccount(4000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewRev");
+
+    ASSERT_EQ(coa->getAccount(5000,&acc),0);
+    ASSERT_EQ(acc->getAccName(), "NewExp");
+
+}
+
+
+TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCDESC){
+    ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","Asset"),0);
+    ASSERT_EQ(coa->CreateAccount(db,2000,"Liability","Liability"),0);
+    ASSERT_EQ(coa->CreateAccount(db,3000,"Equity","Equity"),0);
+    ASSERT_EQ(coa->CreateAccount(db,4000,"Revenue","Revenue"),0);
+    ASSERT_EQ(coa->CreateAccount(db,5000,"Exepense","Exepense"),0);
+
+
+    coa->getAccount(1000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCDESC, "NewAssetDesc"),0);
+    ASSERT_EQ(coa->getAccount(1000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewAssetDesc");
+    ASSERT_EQ(acc->getAccName(), "Asset");
+
+
+    coa->getAccount(2000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCDESC, "NewLiaDesc"),0);
+    ASSERT_EQ(coa->getAccount(2000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewLiaDesc");
+
+    coa->getAccount(3000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCDESC, "NewEquityDesc"),0);
+    ASSERT_EQ(coa->getAccount(3000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewEquityDesc");
+    
+    coa->getAccount(4000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCDESC, "NewRevDesc"),0);
+    ASSERT_EQ(coa->getAccount(4000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewRevDesc");
+
+    coa->getAccount(5000,&acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACCDESC, "NewExpDesc"),0);
+    ASSERT_EQ(coa->getAccount(5000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewExpDesc");
+
+
+    coa->forceSyncCOA();
+    ASSERT_EQ(coa->getAccount(1000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewAssetDesc");   
+
+    ASSERT_EQ(coa->getAccount(2000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewLiaDesc");
+
+    ASSERT_EQ(coa->getAccount(3000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewEquityDesc");
+
+    ASSERT_EQ(coa->getAccount(4000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewRevDesc");
+
+    ASSERT_EQ(coa->getAccount(5000,&acc),0);
+    ASSERT_EQ(acc->getAccDesc(), "NewExpDesc");
+
+}
+
+
+TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_GROUPNUM){
+    ASSERT_EQ(coa->CreateAccount(db,1000,"AssetGrp","AssetGrp"),0);
+    ASSERT_EQ(coa->CreateAccount(db,1500,"Asset","Asset"),0);
+
+    coa->getAccount(1500, &acc);
+    ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1000), 0);
+    ASSERT_TRUE(acc->getGroup());
+    ASSERT_EQ(acc->getGroupNUM(), 1000);
+    ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",0), 0);
+    ASSERT_FALSE(acc->getGroup());
+    ASSERT_EQ(acc->getGroupNUM(), 0);
+
+    ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1500), 3) << "Cannot be same number";
+
+    ASSERT_EQ(coa->CreateAccount(db,1300,"AssetSub","AssetSub"),0);
+    coa->getAccount(1300, &acc);
+    ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1500), 3) << "Number must be greater";
+
+    ASSERT_EQ(coa->CreateAccount(db,2500,"LiaSub","LiaSub"),0);
+    coa->getAccount(2500, &acc);
+    ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1500), 3) << "Number must be in same accounting type";
+
+}
+
+
+TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACTIVE){
+    ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","AssetGrp"),0);
+
+
+    coa->getAccount(1000, &acc);
+    ASSERT_EQ(coa->updateAccount(&acc, ACTIVE, "", 1), 3) << "Should return 3 if status was the same already";
+    ASSERT_EQ(coa->updateAccount(&acc, ACTIVE, "", 0), 0) << "Failing on updating from true to false";
+    ASSERT_EQ(coa->updateAccount(&acc, ACTIVE, "", 0), 3) << "Should return 3 if status was the same already";
+    ASSERT_EQ(coa->updateAccount(&acc ,ACTIVE, "", 1), 0) << "Failing on updating from false to true";
+}
+
 
 int main(int argc, char* argv[]){
     testing::InitGoogleTest(&argc, argv);
