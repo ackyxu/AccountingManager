@@ -7,6 +7,7 @@
 #include <AccountFields.h>
 #include <AccountType.h>
 #include <ChartOfAccounts.h>
+#include <CompositeAccounts.h>
 
 
 
@@ -380,8 +381,30 @@ TEST_F(ChartOfAccountsTest, COA_CreateAccNumberAlreadyExsists){
 }
 
 
+TEST_F(ChartOfAccountsTest, COA_CreateGroupHeaders){
+    ASSERT_EQ(coa->CreateAccount(db,1000,"AssetHeader","AssetHeader",false,0,true),0);
+    ASSERT_EQ(coa->CreateAccount(db,1500,"AssetSub","AssetSub",true,1000),0);
+    ASSERT_EQ(coa->CreateAccount(db,2500,"AssetSub","AssetSub",true,1000),3);
+    ASSERT_EQ(coa->CreateAccount(db,1600,"AssetHeaderSub","AssetHeaderSub",true,1000,true),0);
+    ASSERT_EQ(coa->CreateAccount(db,1650,"AssetHeaderSubSub","AssetHeaderSubSub",true,1600),0);
+
+
+    coa->getAccount(1000, &acc);
+    ASSERT_TRUE(acc->CheckGroupContains(1500));
+    ASSERT_FALSE(acc->CheckGroupContains(2500));
+    ASSERT_TRUE(acc->CheckGroupContains(1600));
+
+    coa->getAccount(1600, &acc);
+    ASSERT_TRUE(acc->CheckGroupContains(1650));
+
+}
+
+
 TEST_F(ChartOfAccountsTest, COA_DataPresistenceAccounts){
     ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","Asset"),0);
+    ASSERT_EQ(coa->CreateAccount(db,1500,"AssetHeader","AssetHeader",false,0,true),0);
+    ASSERT_EQ(coa->CreateAccount(db,1600,"AssetHeaderSub","AssetHeaderSub",true,1500,true),0);
+    ASSERT_EQ(coa->CreateAccount(db,1650,"AssetHeaderSubSub","AssetHeaderSubSub",true,1600),0);
     ASSERT_EQ(coa->CreateAccount(db,2000,"Liability","Liability"),0);
     ASSERT_EQ(coa->CreateAccount(db,3000,"Equity","Equity"),0);
     ASSERT_EQ(coa->CreateAccount(db,4000,"Revenue","Revenue"),0);
@@ -395,11 +418,23 @@ TEST_F(ChartOfAccountsTest, COA_DataPresistenceAccounts){
     coa = new ChartOfAccounts(db);
 
     ASSERT_EQ(coa->getAccount(1000,&acc),0);
+    ASSERT_EQ(coa->getAccount(1500,&acc),0);
+    ASSERT_EQ(coa->getAccount(1600,&acc),0);
+    ASSERT_EQ(coa->getAccount(1650,&acc),0);
     ASSERT_EQ(coa->getAccount(2000,&acc),0);
     ASSERT_EQ(coa->getAccount(3000,&acc),0);
     ASSERT_EQ(coa->getAccount(4000,&acc),0);
     ASSERT_EQ(coa->getAccount(5000,&acc),0);
+
+    coa->getAccount(1600, &acc);
+    ASSERT_TRUE(acc->getHeaderFlag());
+    ASSERT_TRUE(acc->CheckGroupContains(1650));
+
+
     ASSERT_EQ(coa->CreateAccount(db,1000,"Asset","Asset"),2);
+    ASSERT_EQ(coa->CreateAccount(db,1500,"AssetHeader","AssetHeader",false,0,true),2);
+    ASSERT_EQ(coa->CreateAccount(db,1600,"AssetHeaderSub","AssetHeaderSub",true,1500,true),2);
+    ASSERT_EQ(coa->CreateAccount(db,1650,"AssetHeaderSubSub","AssetHeaderSubSub",true,1600),2);
     ASSERT_EQ(coa->CreateAccount(db,2000,"Liability","Liability"),2);
     ASSERT_EQ(coa->CreateAccount(db,3000,"Equity","Equity"),2);
     ASSERT_EQ(coa->CreateAccount(db,4000,"Revenue","Revenue"),2);

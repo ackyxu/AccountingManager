@@ -26,7 +26,9 @@ AccountType Accounts::getAccType(){
     return accType;
 }
 
-
+bool Accounts::getHeaderFlag(){
+    return groupHeader;
+}
 
 bool Accounts::getGroup(){
     return group;

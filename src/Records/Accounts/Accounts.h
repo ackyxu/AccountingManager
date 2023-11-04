@@ -21,8 +21,11 @@ class Accounts {
         string getAccName();
         string getAccDesc();
         AccountType getAccType();
+        bool getHeaderFlag();
         bool getGroup();
         int getGroupNUM();
         bool getActiveStatus();
+        virtual void addSubAccounts(Accounts* acc){};
+        virtual bool CheckGroupContains(int subNumber){return false;};
 
 };

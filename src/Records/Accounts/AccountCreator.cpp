@@ -1,14 +1,18 @@
 #include <AccountCreator.h>
+#include <CompositeAccounts.h>
 #include <Assets.h>
 #include <Liabilities.h>
 #include <Equities.h>
 #include <Revenues.h>
 #include <Expenses.h>
+#include <iostream>
 
 Accounts* AccountCreator::CreateAccount(int accNum, string accName, string accDesc, AccountType accType, bool group, int groupNUM, bool active, bool groupHeader){
     
-
-    if(accType == ASSET){
+    if (groupHeader) {
+        return new CompositeAccounts(accNum, accName,accDesc,accType,group, groupNUM, active, groupHeader);
+    }
+    else if(accType == ASSET){
         return new Assets(accNum, accName,accDesc,accType,group, groupNUM, active, groupHeader);
     }
     else if(accType == LIABILITY) {

@@ -1,5 +1,6 @@
 #include <ChartOfAccounts.h>
 #include <AccountCreator.h>
+#include <CompositeAccounts.h>
 #include <iostream>
 
 using Record = std::vector<std::string>;
@@ -36,6 +37,7 @@ int ChartOfAccounts::CreateAccount(Database db, int accNum, string accName, stri
         AccountType accType = getAccountTypeByNum(accNum);
         if (accType == INVALID) return 3;
         else {
+            if (group and (coa.find(groupID) != coa.end() or (coa[groupID])->getHeaderFlag()) and (coa[groupID]->getAccType() != accType)) return 3;
             sql +=  std::to_string(accNum) + ","
                 + "'" + accName + "'" + ","
                 + "'" + accDesc + "'" + ","
@@ -46,7 +48,10 @@ int ChartOfAccounts::CreateAccount(Database db, int accNum, string accName, stri
                 + "1" + ");";
             if (db.insert(sql) == SQLITE_OK){
                 AccountCreator ac;
-                coa[accNum] = ac.CreateAccount(accNum, accName, accDesc, accType, group,(group ? groupID : 0),true);
+                coa[accNum] = ac.CreateAccount(accNum, accName, accDesc, accType, group,(group ? groupID : 0),true, groupHeader);
+                if (group) {
+                    coa[groupID]->addSubAccounts(coa[accNum]);
+                }
                 return 0;
             } else return 1;
 
@@ -65,7 +70,10 @@ int ChartOfAccounts::getCOAFromDB(){
     if (coa.size() != 0) return 2;
     if(ret == SQLITE_OK){
         for(auto record: records){
-            coa[stoi(record[0])] = ac.CreateAccount(stoi(record[0]), record[1], record[2],(AccountType) stoi(record[3]), (bool) stoi(record[4]),stoi(record[4]),(bool) stoi(record[4]));
+            coa[stoi(record[0])] = ac.CreateAccount(stoi(record[0]), record[1], record[2],(AccountType) stoi(record[3]), (bool) stoi(record[5]),stoi(record[6]),(bool) stoi(record[7]),(bool) stoi(record[4]));
+            if (coa[stoi(record[0])]->getGroup()) {
+                coa[coa[stoi(record[0])]->getGroupNUM()]->addSubAccounts(coa[stoi(record[0])]);
+            }
         }
         return 0;
     } else return ret;
