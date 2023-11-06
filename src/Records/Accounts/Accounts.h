@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 #include <AccountType.h>
 using std::string;
 
@@ -29,5 +30,7 @@ class Accounts {
         virtual int removeSubAccounts(int accNum){return 0;};
         virtual bool CheckGroupContains(int subNumber){return false;};
         virtual bool CanDelete(){return true;};
+        virtual std::vector<int> ListSubAccountNum(){return {};};
+        virtual std::vector<int> ListHeaderSubAccountNum(){return {};};
 
 };

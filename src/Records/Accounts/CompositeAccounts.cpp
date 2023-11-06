@@ -28,12 +28,21 @@ bool CompositeAccounts::CanDelete(){
 }
 
 
-// vector<int> CompositeAccounts::ListSubAccountNum(){
-//     vector<int> subAccNum;
-//     for(auto acc: subAccounts){
-//         subAccounts.push_back(acc->getAccNum());
+std::vector<int> CompositeAccounts::ListSubAccountNum(){
+    std::vector<int> subAccNum;
+    for(auto pair: subAccounts){
+        subAccNum.push_back(pair.first);
+    }
+    return subAccNum;
+}
 
-//     }
-//     return subAccNum;
-// }
+std::vector<int> CompositeAccounts::ListHeaderSubAccountNum(){
+
+    std::vector<int> subAccNum;
+    for(auto pair: subAccounts){
+        if((pair.second)->getHeaderFlag()) subAccNum.push_back(pair.first);
+    }
+    return subAccNum;
+
+}
 

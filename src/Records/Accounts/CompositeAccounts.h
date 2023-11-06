@@ -19,7 +19,8 @@ class CompositeAccounts: public Accounts {
         int removeSubAccounts(int accNum) override;
         bool CheckGroupContains(int subNumber) override;
         bool CanDelete() override;
-        // vector<int> ListSubAccountNum();
+        std::vector<int> ListSubAccountNum() override;
+        std::vector<int> ListHeaderSubAccountNum() override;
         
 
 

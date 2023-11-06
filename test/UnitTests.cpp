@@ -784,6 +784,87 @@ TEST_F(ChartOfAccountsTest, COA_DeleteAccounts){
 
 }
 
+TEST_F(ChartOfAccountsTest, CompositeAccounts_GetSubAccNum){
+
+    coa->CreateAccount(db,1000,"Asset","Asset");
+    coa->CreateAccount(db,1500,"AssetHeader","AssetHeader",false,0,true);
+    coa->CreateAccount(db,1600,"AssetHeaderSub","AssetHeaderSub",true,1500,true);
+    coa->CreateAccount(db,1700,"AssetHeaderSub","AssetHeaderSub",true,1500);
+    coa->CreateAccount(db,1650,"AssetHeaderSubSub","AssetHeaderSubSub",true,1600);
+
+    bool found = false;
+    coa->getAccount(1500, &acc);
+    std::vector<int> subAccountNums = acc->ListSubAccountNum();
+
+    for(auto accNum: subAccountNums){
+        if (accNum == 1600){
+            found = true;
+        }
+    }
+
+    ASSERT_TRUE(found) << "Finding accNum 1600";
+
+    found = false;
+    for(auto accNum: subAccountNums){
+        if (accNum == 1700){
+            found = true;
+        }
+    }
+
+    ASSERT_TRUE(found) << "Finding accNum 1700";
+
+    found = false;
+    for(auto accNum: subAccountNums){
+        if (accNum == 1650){
+            found = true;
+        }
+    }
+
+    ASSERT_FALSE(found) << "Finding accNum 1650 (sub acc for 1600)";
+
+}
+
+
+TEST_F(ChartOfAccountsTest, CompositeAccounts_GetHeaderSubAccNum){
+
+    coa->CreateAccount(db,1000,"Asset","Asset");
+    coa->CreateAccount(db,1500,"AssetHeader","AssetHeader",false,0,true);
+    coa->CreateAccount(db,1600,"AssetHeaderSub","AssetHeaderSub",true,1500,true);
+    coa->CreateAccount(db,1700,"AssetHeaderSub","AssetHeaderSub",true,1500);
+    coa->CreateAccount(db,1650,"AssetHeaderSubSub","AssetHeaderSubSub",true,1600);
+
+    bool found = false;
+    coa->getAccount(1500, &acc);
+    std::vector<int> subAccountNums = acc->ListHeaderSubAccountNum();
+
+    for(auto accNum: subAccountNums){
+        if (accNum == 1600){
+            found = true;
+        }
+    }
+
+    ASSERT_TRUE(found) << "Finding accNum 1600";
+
+    found = false;
+    for(auto accNum: subAccountNums){
+        if (accNum == 1700){
+            found = true;
+        }
+    }
+
+    ASSERT_FALSE(found) << "Finding accNum 1700";
+
+    found = false;
+    for(auto accNum: subAccountNums){
+        if (accNum == 1650){
+            found = true;
+        }
+    }
+
+    ASSERT_FALSE(found) << "Finding accNum 1650 (sub acc for 1600)";
+
+}
+
 int main(int argc, char* argv[]){
     testing::InitGoogleTest(&argc, argv);
     std::cout << "Running Tests" << std::endl;
