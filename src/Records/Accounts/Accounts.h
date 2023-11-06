@@ -26,6 +26,8 @@ class Accounts {
         int getGroupNUM();
         bool getActiveStatus();
         virtual void addSubAccounts(Accounts* acc){};
+        virtual int removeSubAccounts(int accNum){return 0;};
         virtual bool CheckGroupContains(int subNumber){return false;};
+        virtual bool CanDelete(){return true;};
 
 };

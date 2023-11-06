@@ -697,17 +697,29 @@ TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACCDESC){
 
 
 TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_GROUPNUM){
-    ASSERT_EQ(coa->CreateAccount(db,1000,"AssetGrp","AssetGrp"),0);
+    ASSERT_EQ(coa->CreateAccount(db,1000,"AssetGrp","AssetGrp",false, 0, true),0);
+    ASSERT_EQ(coa->CreateAccount(db,1100,"AssetGrp2","AssetGrp"),0);
     ASSERT_EQ(coa->CreateAccount(db,1500,"Asset","Asset"),0);
 
     coa->getAccount(1500, &acc);
+    ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1100), 3);
     ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1000), 0);
     ASSERT_TRUE(acc->getGroup());
     ASSERT_EQ(acc->getGroupNUM(), 1000);
+    coa->getAccount(1000, &acc);
+    ASSERT_TRUE(acc->CheckGroupContains(1500));
+    
+    
+    coa->getAccount(1500, &acc);
     ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",0), 0);
     ASSERT_FALSE(acc->getGroup());
     ASSERT_EQ(acc->getGroupNUM(), 0);
+    
+    
+    coa->getAccount(1000, &acc);
+    ASSERT_FALSE(acc->CheckGroupContains(1500));
 
+    coa->getAccount(1500, &acc);
     ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1500), 3) << "Cannot be same number";
 
     ASSERT_EQ(coa->CreateAccount(db,1300,"AssetSub","AssetSub"),0);
@@ -717,6 +729,8 @@ TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_GROUPNUM){
     ASSERT_EQ(coa->CreateAccount(db,2500,"LiaSub","LiaSub"),0);
     coa->getAccount(2500, &acc);
     ASSERT_EQ(coa->updateAccount(&acc, GROUPNUM,"",1500), 3) << "Number must be in same accounting type";
+
+    
 
 }
 
@@ -732,6 +746,43 @@ TEST_F(ChartOfAccountsTest, COA_UpdateAccounts_ACTIVE){
     ASSERT_EQ(coa->updateAccount(&acc ,ACTIVE, "", 1), 0) << "Failing on updating from false to true";
 }
 
+
+TEST_F(ChartOfAccountsTest, COA_DeleteAccounts){
+
+    coa->CreateAccount(db,1000,"Asset","Asset");
+    coa->CreateAccount(db,1500,"AssetHeader","AssetHeader",false,0,true);
+    coa->CreateAccount(db,1600,"AssetHeaderSub","AssetHeaderSub",true,1500,true);
+    coa->CreateAccount(db,1650,"AssetHeaderSubSub","AssetHeaderSubSub",true,1600);
+    coa->CreateAccount(db,2000,"Liability","Liability");
+    coa->CreateAccount(db,3000,"Equity","Equity");
+    coa->CreateAccount(db,4000,"Revenue","Revenue");
+    coa->CreateAccount(db,5000,"Exepense","Exepense");
+
+    ASSERT_EQ(coa->deleteAccount(2000), 0) << "Should have successfully deleted a non-group account";
+    ASSERT_EQ(coa->deleteAccount(2000), 2) << "Already deleted the non-group account, shouldn't be able to do it again";
+    ASSERT_EQ(coa->deleteAccount(3000), 0) << "Should have successfully deleted a non-group account";
+    
+    ASSERT_EQ(coa->deleteAccount(1500), 2) << "Shouldn't be able to delete a group-header account without first deleting/removing sub accounts";
+    ASSERT_EQ(coa->deleteAccount(1650), 0) << "Should have successfully deleted a non-group account";
+    ASSERT_EQ(coa->deleteAccount(1500), 2) << "Shouldn't be able to delete a group-header account without first deleting/removing sub accounts (1650)";
+    ASSERT_EQ(coa->deleteAccount(1600), 0) << "Should have successfully deleted a group account with no sub accounts";
+    ASSERT_EQ(coa->deleteAccount(1500), 0) << "Finally, should have successfully deleted a group account with no sub accounts";
+
+
+    // Check presistence, aka check that the datebase has been updated correctly
+    db.closeDatabase();
+    delete coa;
+
+    db.connectDatabase(filename);
+    coa = new ChartOfAccounts(db);
+    ASSERT_EQ(coa->getAccount(1500,&acc),1);
+    ASSERT_EQ(coa->getAccount(1600,&acc),1);
+    ASSERT_EQ(coa->getAccount(1650,&acc),1);
+    ASSERT_EQ(coa->getAccount(1000,&acc),0);
+    ASSERT_EQ(coa->getAccount(4000,&acc),0);
+    ASSERT_EQ(coa->getAccount(5000,&acc),0);
+
+}
 
 int main(int argc, char* argv[]){
     testing::InitGoogleTest(&argc, argv);

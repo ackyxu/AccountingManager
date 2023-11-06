@@ -6,13 +6,34 @@ CompositeAccounts::CompositeAccounts(int accNum, string accName, string accDesc,
     }
     
 void CompositeAccounts::addSubAccounts(Accounts* acc){
-    subAccounts.push_back(acc);
+    if (subAccounts.find(acc->getAccNum()) == subAccounts.end()){
+        subAccounts[acc->getAccNum()] = acc;
+    }
 }
 
 bool CompositeAccounts::CheckGroupContains(int subNumber){
-    for(Accounts* acc: subAccounts){
-        if (acc->getAccNum() == subNumber) return true;
-    }
-    return false;
+    return subAccounts.find(subNumber) != subAccounts.end();
 }
+
+int CompositeAccounts::removeSubAccounts(int accNum){
+    if (subAccounts.find(accNum) != subAccounts.end()){
+        subAccounts.erase(accNum);
+        return 0;
+    } else return 2;
+
+}
+
+bool CompositeAccounts::CanDelete(){
+    return subAccounts.empty();
+}
+
+
+// vector<int> CompositeAccounts::ListSubAccountNum(){
+//     vector<int> subAccNum;
+//     for(auto acc: subAccounts){
+//         subAccounts.push_back(acc->getAccNum());
+
+//     }
+//     return subAccNum;
+// }
 

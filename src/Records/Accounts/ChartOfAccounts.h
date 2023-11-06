@@ -3,12 +3,12 @@
 
 #include <Accounts.h>
 #include <AccountType.h>
-#include <unordered_map >
+#include <unordered_map>
 #include <Database.h>
 #include <AccountFields.h>
 
 using std::pair;
-using std::unordered_map ;
+using std::unordered_map;
 
 class ChartOfAccounts{
 
@@ -41,6 +41,7 @@ class ChartOfAccounts{
         int CreateAccount(Database db, int accNum, string accName, string accDesc, bool group=false, int groupID = 0, bool groupHeader = false);
         int getAccount(int accNum, Accounts** acc);
         int updateAccount(Accounts** acc, AccountFields field, string stringVal = NULL, int intVal = NULL, float floatVal = NULL);
+        int deleteAccount(int accNum);
 };
 
 

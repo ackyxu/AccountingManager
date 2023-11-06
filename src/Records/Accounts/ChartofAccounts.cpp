@@ -224,6 +224,9 @@ int ChartOfAccounts::updateGROUPNUM(Accounts** acc, int newGroupNum){
         if(ret == SQLITE_OK){
             Accounts* newACC = ac.CreateAccount((*acc)->getAccNum(), (*acc)->getAccDesc(), (*acc)->getAccDesc(), 
                                                 (*acc)->getAccType(), false, 0, (*acc)->getActiveStatus());
+            if ((*acc)->getGroup()){
+                (coa[(*acc)->getGroupNUM()])->removeSubAccounts(oldAccNum);
+            }
             coa.erase((*acc)->getAccNum());
             delete *acc;
             coa[oldAccNum] = newACC;
@@ -232,7 +235,7 @@ int ChartOfAccounts::updateGROUPNUM(Accounts** acc, int newGroupNum){
         } else return ret;
 
     } else if(coa.find(newGroupNum) != coa.end()) {
-        if (newGroupNum >= oldAccNum or getAccountTypeByNum(newGroupNum) != getAccountTypeByNum(oldAccNum)) return 3;
+        if (newGroupNum >= oldAccNum or getAccountTypeByNum(newGroupNum) != getAccountTypeByNum(oldAccNum) or !(coa[newGroupNum]->getHeaderFlag())) return 3;
         AccountCreator ac;
         std::string sql = "UPDATE " + TableName + " SET ACCGROUP = 1, GRPNUM = " + std::to_string(newGroupNum) + " WHERE ACCNUM = " + std::to_string(oldAccNum) +";";
         int ret = db.query(sql, NULL);
@@ -245,6 +248,7 @@ int ChartOfAccounts::updateGROUPNUM(Accounts** acc, int newGroupNum){
             coa.erase(oldAccNum);
             delete *acc;
             coa[oldAccNum] = newACC;
+            coa[newGroupNum]->addSubAccounts(newACC);
             *acc = newACC;
             return 0;
         } else return ret;
@@ -275,4 +279,21 @@ int ChartOfAccounts::updateActiveStatus(Accounts** acc, int activeStatus){
     } else return 2;
 }
 
+
+int ChartOfAccounts::deleteAccount(int accNum){
+    if(coa.find(accNum) != coa.end() and coa[accNum]->CanDelete()){
+        std::string sql = "DELETE FROM " + TableName + " WHERE ACCNUM = " + std::to_string(accNum) +";";
+        int ret = db.query(sql, NULL);
+        if (ret == SQLITE_OK){
+            if (coa[accNum]->getGroup()){
+                int groupNum = coa[accNum]->getGroupNUM();
+                coa[groupNum]->removeSubAccounts(accNum);
+            }
+            delete coa[accNum];
+            coa.erase(accNum);
+            return 0;
+        } else return ret;
+
+    } else return 2;
+}
                             
